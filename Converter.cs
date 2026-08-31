@@ -20,7 +20,7 @@ namespace DocToPdf
 
             if (startInfo.FileName == null)
             {
-                throw new Exception("LibreOffice executable not found. Ensure that LibreOffice is installed and accessible via Flatpak.");
+                throw new Exception("LibreOffice executable not found. Ensure that LibreOffice is installed on your system.");
             }
 
             using (Process? process = Process.Start(startInfo))
