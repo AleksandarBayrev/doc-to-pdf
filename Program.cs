@@ -10,7 +10,7 @@ namespace DocToPdf
         {
             if (args.Length != 1 || string.IsNullOrEmpty(args[0]) || !File.Exists(args[0]))
             {
-                Console.WriteLine("Usage: MergeDocxToPdf <path_to_config.json>. Example: MergeDocxToPdf C:\\config.json");
+                Console.WriteLine("Usage: doc-to-pdf <path_to_config.json>. Example: doc-to-pdf C:\\config.json");
                 return;
             }
 
