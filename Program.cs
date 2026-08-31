@@ -1,4 +1,5 @@
-﻿using PdfSharpCore.Pdf;
+﻿using System.Text.Json;
+using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
 
 namespace DocToPdf
@@ -7,45 +8,59 @@ namespace DocToPdf
     {
         static async Task Main(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length != 1 || string.IsNullOrEmpty(args[0]) || !File.Exists(args[0]))
             {
-                Console.WriteLine("Usage: MergeDocxToPdf <input_folder> <output_folder>");
+                Console.WriteLine("Usage: MergeDocxToPdf <path_to_config.json>. Example: MergeDocxToPdf C:\\config.json");
                 return;
             }
 
-            string inputFolder = Path.GetFullPath(args[0]);
-            string outputFolder = Path.GetFullPath(args[1]);
+            var adjustedPath = Path.GetFullPath(args[0]);
 
-            if (!Directory.Exists(inputFolder))
+            var config = JsonSerializer.Deserialize<Config>(await File.ReadAllTextAsync(adjustedPath));
+
+            if (config == null)
             {
-                Console.WriteLine($"The specified input folder does not exist: {inputFolder}");
+                Console.WriteLine("Failed to read configuration from config.json.");
                 return;
             }
 
-            if (!Directory.Exists(outputFolder))
+            if (string.IsNullOrWhiteSpace(config.InputFolder) || string.IsNullOrWhiteSpace(config.OutputFolder))
             {
-                Directory.CreateDirectory(outputFolder);
+                Console.WriteLine("Both inputFolder and outputFolder must be specified in the config.json.");
+                return;
             }
 
-            string[] docxFiles = Directory.GetFiles(inputFolder, "*.docx");
+            if (!Directory.Exists(config.InputFolder))
+            {
+                Console.WriteLine($"The specified input folder does not exist: {config.InputFolder}");
+                return;
+            }
+
+            if (!Directory.Exists(config.OutputFolder))
+            {
+                Directory.CreateDirectory(config.OutputFolder);
+            }
+
+            List<string> docxFiles = Directory.GetFiles(config.InputFolder, "*.docx").ToList();
+            docxFiles.AddRange(Directory.GetFiles(config.InputFolder, "*.doc").ToList());
 
             // Sort files alphabetically so they merge in a predictable order
-            Array.Sort(docxFiles);
+            docxFiles.Sort();
 
-            if (docxFiles.Length == 0)
+            if (docxFiles.Count == 0)
             {
                 Console.WriteLine("No DOCX files found in the specified folder.");
                 return;
             }
 
-            string outputFilePath = Path.Combine(outputFolder, "MergedDocument.pdf");
+            string outputFilePath = Path.Combine(config.OutputFolder, "MergedDocument.pdf");
 
-            string tempFolder = Path.Combine(outputFolder, "TempPdfs_" + Guid.NewGuid().ToString().Substring(0, 8));
+            string tempFolder = Path.Combine(config.OutputFolder, "TempPdfs_" + Guid.NewGuid().ToString().Substring(0, 8));
             Directory.CreateDirectory(tempFolder);
 
             try
             {
-                Console.WriteLine($"Found {docxFiles.Length} files. Converting to PDF via LibreOffice...");
+                Console.WriteLine($"Found {docxFiles.Count} files. Converting to PDF via LibreOffice...");
 
                 foreach (string docx in docxFiles)
                 {
