@@ -38,40 +38,56 @@ namespace DocToPdf
                 }
             }
         }
+        
         private static (string FileName, string Arguments) GetLibreOfficeCommand(string inputPath, string outputDir)
         {
             string baseArgs = $"--headless --convert-to pdf \"{inputPath}\" --outdir \"{outputDir}\"";
 
-            var pathProgramFiles = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "LibreOffice", "program", "soffice.exe");
-            if (IsCommandAvailable(pathProgramFiles, "--version"))
+            if (OperatingSystem.IsWindows())
             {
-                Console.WriteLine($"Using '{pathProgramFiles}' command for conversion.");
-                return (pathProgramFiles, baseArgs);
+                var pathProgramFiles = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "LibreOffice", "program", "soffice.exe");
+                if (IsCommandAvailable(pathProgramFiles, "--version"))
+                {
+                    Console.WriteLine($"Using '{pathProgramFiles}' command for conversion.");
+                    return (pathProgramFiles, baseArgs);
+                }
+
+                var pathProgramFilesX86 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "LibreOffice", "program", "soffice.exe");
+                if (IsCommandAvailable(pathProgramFilesX86, "--version"))
+                {
+                    Console.WriteLine($"Using '{pathProgramFilesX86}' command for conversion.");
+                    return (pathProgramFilesX86, baseArgs);
+                }
             }
 
-            var pathProgramFilesX86 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "LibreOffice", "program", "soffice.exe");
-            if (IsCommandAvailable(pathProgramFilesX86, "--version"))
+            if (OperatingSystem.IsLinux())
             {
-                Console.WriteLine($"Using '{pathProgramFilesX86}' command for conversion.");
-                return (pathProgramFilesX86, baseArgs);
+                if (IsCommandAvailable("flatpak", "info org.libreoffice.LibreOffice"))
+                {
+                    Console.WriteLine("Using 'flatpak run org.libreoffice.LibreOffice' command for conversion.");
+                    return ("flatpak", $"run org.libreoffice.LibreOffice {baseArgs}");
+                }
+                if (IsCommandAvailable("libreoffice", "--version"))
+                {
+                    Console.WriteLine("Using 'libreoffice' command for conversion.");
+                    return ("libreoffice", baseArgs);
+                }
+
+                if (IsCommandAvailable("soffice", "--version"))
+                {
+                    Console.WriteLine("Using 'soffice' command for conversion.");
+                    return ("soffice", baseArgs);
+                }
             }
 
-            if (IsCommandAvailable("libreoffice", "--version"))
+            if (OperatingSystem.IsMacOS())
             {
-                Console.WriteLine("Using 'libreoffice' command for conversion.");
-                return ("libreoffice", baseArgs);
-            }
-
-            if (IsCommandAvailable("soffice", "--version"))
-            {
-                Console.WriteLine("Using 'soffice' command for conversion.");
-                return ("soffice", baseArgs);
-            }
-
-            if (IsCommandAvailable("flatpak", "info org.libreoffice.LibreOffice"))
-            {
-                Console.WriteLine("Using 'flatpak run org.libreoffice.LibreOffice' command for conversion.");
-                return ("flatpak", $"run org.libreoffice.LibreOffice {baseArgs}");
+                var pathLibreOffice = "/Applications/LibreOffice.app/Contents/MacOS/soffice";
+                if (IsCommandAvailable(pathLibreOffice, "--version"))
+                {
+                    Console.WriteLine($"Using '{pathLibreOffice}' command for conversion.");
+                    return (pathLibreOffice, baseArgs);
+                }
             }
 
             throw new Exception("LibreOffice executable not found. Ensure that it is installed natively or accessible via Flatpak.");
@@ -98,9 +114,9 @@ namespace DocToPdf
                 process.Start();
                 process.StandardInput.Write("\n"); // Send a newline to ensure the command doesn't hang waiting for input
                 process.WaitForExit();
-                
+
                 // Return true if the command ran successfully
-                return process.ExitCode == 0; 
+                return process.ExitCode == 0;
             }
             catch
             {
