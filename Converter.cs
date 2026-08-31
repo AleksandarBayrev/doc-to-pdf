@@ -15,7 +15,8 @@ namespace DocToPdf
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             if (startInfo.FileName == null)
@@ -28,6 +29,11 @@ namespace DocToPdf
                 if (process == null)
                 {
                     throw new Exception("Failed to start LibreOffice process.");
+                }
+
+                if (OperatingSystem.IsWindows())
+                {
+                    process.StandardInput.Write("\n"); // Send a newline to ensure the command doesn't hang waiting for input
                 }
 
                 await process.WaitForExitAsync();
