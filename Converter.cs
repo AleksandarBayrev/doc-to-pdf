@@ -38,7 +38,7 @@ namespace DocToPdf
                 }
             }
         }
-        
+
         private static (string FileName, string Arguments) GetLibreOfficeCommand(string inputPath, string outputDir)
         {
             string baseArgs = $"--headless --convert-to pdf \"{inputPath}\" --outdir \"{outputDir}\"";
@@ -112,7 +112,12 @@ namespace DocToPdf
                 };
 
                 process.Start();
-                process.StandardInput.Write("\n"); // Send a newline to ensure the command doesn't hang waiting for input
+
+                if (OperatingSystem.IsWindows())
+                {
+                    process.StandardInput.Write("\n"); // Send a newline to ensure the command doesn't hang waiting for input
+                }
+
                 process.WaitForExit();
 
                 // Return true if the command ran successfully
