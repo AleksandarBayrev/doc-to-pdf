@@ -47,6 +47,9 @@ namespace DocToPdf
                 Directory.CreateDirectory(adjustedConfig.OutputFolder);
             }
 
+            Console.WriteLine("Starting DOCX to PDF conversion and merging process...");
+            Console.WriteLine($"Detected Operating System: {OSDetector.GetOSName()}");
+            Console.WriteLine($"Configuration loaded from: {adjustedPath}");
             Console.WriteLine($"Input Folder: {adjustedConfig.InputFolder}");
             Console.WriteLine($"Output Folder: {adjustedConfig.OutputFolder}");
 
