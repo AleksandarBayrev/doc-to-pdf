@@ -42,16 +42,18 @@ namespace DocToPdf
         {
             string baseArgs = $"--headless --convert-to pdf \"{inputPath}\" --outdir \"{outputDir}\"";
 
-            if (IsCommandAvailable(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "LibreOffice", "program", "soffice.exe"), "--version"))
+            var pathProgramFiles = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "LibreOffice", "program", "soffice.exe");
+            if (IsCommandAvailable(pathProgramFiles, "--version"))
             {
-                Console.WriteLine("Using 'libreoffice' command for conversion.");
-                return ("soffice", baseArgs);
+                Console.WriteLine($"Using '{pathProgramFiles}' command for conversion.");
+                return (pathProgramFiles, baseArgs);
             }
 
-            if (IsCommandAvailable(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "LibreOffice", "program", "soffice.exe"), "--version"))
+            var pathProgramFilesX86 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "LibreOffice", "program", "soffice.exe");
+            if (IsCommandAvailable(pathProgramFilesX86, "--version"))
             {
-                Console.WriteLine("Using 'soffice' command for conversion.");
-                return ("soffice", baseArgs);
+                Console.WriteLine($"Using '{pathProgramFilesX86}' command for conversion.");
+                return (pathProgramFilesX86, baseArgs);
             }
 
             if (IsCommandAvailable("libreoffice", "--version"))
