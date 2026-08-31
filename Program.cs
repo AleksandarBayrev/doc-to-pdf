@@ -30,32 +30,38 @@ namespace DocToPdf
                 return;
             }
 
-            if (!Directory.Exists(config.InputFolder))
+            var adjustedConfig = new Config
             {
-                Console.WriteLine($"The specified input folder does not exist: {config.InputFolder}");
+                InputFolder = Path.GetFullPath(config.InputFolder),
+                OutputFolder = Path.GetFullPath(config.OutputFolder)
+            };
+
+            if (!Directory.Exists(adjustedConfig.InputFolder))
+            {
+                Console.WriteLine($"The specified input folder does not exist: {adjustedConfig.InputFolder}");
                 return;
             }
 
-            if (!Directory.Exists(config.OutputFolder))
+            if (!Directory.Exists(adjustedConfig.OutputFolder))
             {
-                Directory.CreateDirectory(config.OutputFolder);
+                Directory.CreateDirectory(adjustedConfig.OutputFolder);
             }
 
-            List<string> docxFiles = Directory.GetFiles(config.InputFolder, "*.docx").ToList();
-            docxFiles.AddRange(Directory.GetFiles(config.InputFolder, "*.doc").ToList());
+            List<string> docxFiles = Directory.GetFiles(adjustedConfig.InputFolder, "*.docx").ToList();
+            docxFiles.AddRange(Directory.GetFiles(adjustedConfig.InputFolder, "*.doc").ToList());
 
             // Sort files alphabetically so they merge in a predictable order
             docxFiles.Sort();
 
             if (docxFiles.Count == 0)
             {
-                Console.WriteLine("No DOCX files found in the specified folder.");
+                Console.WriteLine($"No DOCX files found in the specified folder {adjustedConfig.InputFolder}.");
                 return;
             }
 
-            string outputFilePath = Path.Combine(config.OutputFolder, $"MergedDocument_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+            string outputFilePath = Path.Combine(adjustedConfig.OutputFolder, $"MergedDocument_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
 
-            string tempFolder = Path.Combine(config.OutputFolder, "TempPdfs_" + Guid.NewGuid().ToString().Substring(0, 8));
+            string tempFolder = Path.Combine(adjustedConfig.OutputFolder, "TempPdfs_" + Guid.NewGuid().ToString().Substring(0, 8));
             Directory.CreateDirectory(tempFolder);
 
             try
