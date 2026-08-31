@@ -47,6 +47,9 @@ namespace DocToPdf
                 Directory.CreateDirectory(adjustedConfig.OutputFolder);
             }
 
+            Console.WriteLine($"Input Folder: {adjustedConfig.InputFolder}");
+            Console.WriteLine($"Output Folder: {adjustedConfig.OutputFolder}");
+
             List<string> docxFiles = Directory.GetFiles(adjustedConfig.InputFolder, "*.docx").ToList();
             docxFiles.AddRange(Directory.GetFiles(adjustedConfig.InputFolder, "*.doc").ToList());
 
