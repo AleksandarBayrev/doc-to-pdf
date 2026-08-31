@@ -53,7 +53,7 @@ namespace DocToPdf
                 return;
             }
 
-            string outputFilePath = Path.Combine(config.OutputFolder, "MergedDocument.pdf");
+            string outputFilePath = Path.Combine(config.OutputFolder, $"MergedDocument_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
 
             string tempFolder = Path.Combine(config.OutputFolder, "TempPdfs_" + Guid.NewGuid().ToString().Substring(0, 8));
             Directory.CreateDirectory(tempFolder);
