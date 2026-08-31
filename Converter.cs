@@ -90,11 +90,13 @@ namespace DocToPdf
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         UseShellExecute = false,
-                        CreateNoWindow = true
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
                     }
                 };
 
                 process.Start();
+                process.StandardInput.Write("\n"); // Send a newline to ensure the command doesn't hang waiting for input
                 process.WaitForExit();
                 
                 // Return true if the command ran successfully
